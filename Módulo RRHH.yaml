@@ -1,0 +1,254 @@
+openapi: 3.0.0
+info:
+  title: API Módulo RRHH - PoliMarket
+  version: "1.0.1"
+  description: |
+    API del módulo de Recursos Humanos del sistema PoliMarket.
+    Maneja empleados, vendedores y administradores de RRHH.
+
+servers:
+  - url: https://akira.sedbaq.com.co/rrhh
+    description: Servidor en la nube producción
+
+tags:
+  - name: Vendedores
+    description: Gestión de vendedores del sistema
+  - name: Administradores
+    description: Administración de RRHH
+
+paths:
+
+  /vendedor/crear:
+    post:
+      summary: Crear un vendedor
+      tags: [Vendedores]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VendedorCreate'
+      responses:
+        "201":
+          description: Vendedor creado exitosamente (devuelve el objeto creado con id)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VendedorResponse'
+              examples:
+                creado:
+                  value:
+                    message: "Vendedor creado exitosamente"
+                    id: 12
+                    nombre: "Juan"
+                    apellido: "Pérez"
+                    documento: "12345678"
+                    email: "juan.perez@empresa.com"
+                    codigo_vendedor: "VEN-1001"
+                    estado_autorizacion: false
+        "400":
+          description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Faltan campos requeridos: nombre, apellido"
+
+  /vendedor/autorizar/{id}:
+    post:
+      summary: Autorizar un vendedor
+      tags: [Vendedores]
+      description: Autoriza al vendedor especificado por ID y devuelve los datos completos del vendedor.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del vendedor a autorizar
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Vendedor autorizado exitosamente (devuelve el objeto vendedor)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VendedorResponse'
+              examples:
+                autorizado:
+                  value:
+                    message: "Vendedor autorizado exitosamente"
+                    id: 12
+                    nombre: "Juan"
+                    apellido: "Pérez"
+                    documento: "12345678"
+                    email: "juan.perez@empresa.com"
+                    codigo_vendedor: "VEN-1001"
+                    estado_autorizacion: true
+        "404":
+          description: Vendedor no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Vendedor no encontrado"
+
+  /vendedor/{id}:
+    get:
+      summary: Obtener información de un vendedor
+      tags: [Vendedores]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del vendedor
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Información del vendedor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VendedorResponse'
+              example:
+                id: 12
+                nombre: "Juan"
+                apellido: "Pérez"
+                documento: "12345678"
+                email: "juan.perez@empresa.com"
+                codigo_vendedor: "VEN-1001"
+                estado_autorizacion: true
+        "404":
+          description: Vendedor no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Vendedor no encontrado"
+
+  /administrador/crear:
+    post:
+      summary: Crear un Administrador de RRHH
+      tags: [Administradores]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdministradorCreate'
+      responses:
+        "201":
+          description: Administrador creado exitosamente (devuelve id y datos)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdministradorResponse'
+              example:
+                message: "Administrador creado exitosamente"
+                id: 3
+                nombre: "Laura"
+                apellido: "González"
+                documento: "778899"
+                email: "laura@empresa.com"
+                cargo: "Gerente de RRHH"
+        "400":
+          description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Faltan campos requeridos: nombre, apellido, cargo"
+
+components:
+  schemas:
+
+    VendedorCreate:
+      type: object
+      required:
+        - nombre
+        - apellido
+        - documento
+        - email
+        - codigo_vendedor
+      properties:
+        nombre:
+          type: string
+        apellido:
+          type: string
+        documento:
+          type: string
+        email:
+          type: string
+        codigo_vendedor:
+          type: string
+
+    VendedorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Mensaje informativo (opcional)
+        id:
+          type: integer
+          description: Identificador único del vendedor
+        nombre:
+          type: string
+        apellido:
+          type: string
+        documento:
+          type: string
+        email:
+          type: string
+        codigo_vendedor:
+          type: string
+        estado_autorizacion:
+          type: boolean
+          description: Indica si el vendedor está autorizado
+
+    AdministradorCreate:
+      type: object
+      required:
+        - nombre
+        - apellido
+        - documento
+        - email
+        - cargo
+      properties:
+        nombre:
+          type: string
+        apellido:
+          type: string
+        documento:
+          type: string
+        email:
+          type: string
+        cargo:
+          type: string
+
+    AdministradorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        id:
+          type: integer
+        nombre:
+          type: string
+        apellido:
+          type: string
+        documento:
+          type: string
+        email:
+          type: string
+        cargo:
+          type: string
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
